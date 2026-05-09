@@ -1,11 +1,14 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonBaseProps = {
   variant?: 'primary' | 'secondary' | 'accent';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
-}
+  children?: React.ReactNode;
+};
+
+type ButtonProps = Omit<HTMLMotionProps<"button">, "children"> & ButtonBaseProps;
 
 export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
@@ -16,7 +19,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles = 'font-semibold rounded-lg transition-all duration-200';
-  
+
   const variants = {
     primary: 'bg-primary-600 hover:bg-primary-700 text-white',
     secondary: 'bg-gray-700 hover:bg-gray-600 text-white',

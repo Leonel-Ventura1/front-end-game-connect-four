@@ -5,7 +5,7 @@ import { GameBoard } from '../components/GameBoard.js';
 import { Card } from '../components/Card.js';
 import { Button } from '../components/Button.js';
 import { Chat } from '../components/Chat.js';
-import { Loader } from '../components/Loader.js';
+
 
 import { Room, GameState, Message } from '../types/index.js';
 
@@ -13,6 +13,7 @@ import { apiClient } from '../services/api.js';
 import { wsService } from '../services/websocket.js';
 
 import { useAuthStore } from '../store/auth.js';
+import { Loader } from '@/components/Loader.js';
 
 const ROWS = 6;
 const COLS = 7;
@@ -31,8 +32,8 @@ export const Game: React.FC = () => {
   const [room, setRoom] = useState<Room | null>(null);
   const [game, setGame] = useState<GameState | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [startingGame, setStartingGame] = useState(false);
 
@@ -150,19 +151,17 @@ export const Game: React.FC = () => {
 
 
         wsService.onGameStarted((updatedGame) => {
-          console.log('✅ Jogo iniciado via socket:', updatedGame);
           setGame(updatedGame);
         });
 
 
         wsService.onGameUpdated((updatedGame) => {
-          console.log('📊 Jogo atualizado via socket:', updatedGame);
+         
           setGame(updatedGame);
         });
 
-        // Quando o jogo termina
+    
         wsService.onGameEnded((updatedGame) => {
-          console.log('🏁 Jogo terminado:', updatedGame);
           setGame(updatedGame);
         });
 
@@ -202,10 +201,10 @@ export const Game: React.FC = () => {
 
   useEffect(() => {
     if (!roomId || !token) return;
-
+setLoading(true);
     const loadData = async () => {
       try {
-        setLoading(true);
+    
 
         const roomData = await apiClient.getRoomById(roomId);
         setRoom(roomData);
@@ -225,7 +224,7 @@ export const Game: React.FC = () => {
       } catch (err: any) {
         setError('Falha ao carregar dados do jogo');
       } finally {
-        setLoading(false);
+      setLoading(false);
       }
     };
 
@@ -282,7 +281,7 @@ export const Game: React.FC = () => {
 
 
   const handleMove = async (column: number) => {
-    // Validações iniciais
+
     if (!game || !user) {
       setError('Erro: jogo não carregado');
       return;
@@ -312,7 +311,7 @@ export const Game: React.FC = () => {
         setError(' Esta coluna está cheia');
         return;
       }
-      // Determinar cor da peça (usar P1/P2 para consistência)
+     
       const currentDisc =
         game.currentPlayer === 'player1' ? 'P1' : 'P2';
 
@@ -320,8 +319,7 @@ export const Game: React.FC = () => {
       boardCopy[row][column] = currentDisc;
 
 
-      const hasWinner = checkWinner(boardCopy, row, column);
-
+ 
 
       setGame({
         ...game,
@@ -374,7 +372,7 @@ export const Game: React.FC = () => {
     }
   };
 
-  /*
+
  
 
   const handleStartGame = async () => {
@@ -383,7 +381,6 @@ export const Game: React.FC = () => {
     try {
       setStartingGame(true);
 
-      // Chamar API para iniciar o jogo
       const newGame = await apiClient.startGame(roomId);
       setGame(newGame);
 
@@ -396,40 +393,36 @@ export const Game: React.FC = () => {
     }
   };
 
+  if (checkWinner(game?.board ?? [], 0, 0)) {
+  console.log('winner');
+}
+
   const winnerName =
   game?.winner?.username ??
   (game?.winnerId === game?.player1Id
     ? game?.player1?.username
     : game?.player2?.username) ??
   'Jogador';
-  /*
-   |--------------------------------------------------------------------------
-
-
+ 
   if (loading) {
     return <Loader />;
   }
 
-  /*
-
+  
 
   if (!room) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
         <Card>
           <p className="text-lg text-red-400">
-            ❌ {error || 'Sala não encontrada'}
+             {error || 'Sala não encontrada'}
           </p>
         </Card>
       </div>
     );
   }
 
-  /*
-   |--------------------------------------------------------------------------
-   | RENDER - MAIN
-   |--------------------------------------------------------------------------
-   */
+
 
   return (
     <motion.div
@@ -445,7 +438,7 @@ export const Game: React.FC = () => {
           className="mb-8 text-center"
         >
           <h1 className="text-3xl font-bold mb-2">
-            🎮 {room.name}
+            🎮 {room?.name}
           </h1>
 
           <p className="text-gray-400">
@@ -477,7 +470,7 @@ export const Game: React.FC = () => {
 
           <div className="lg:col-span-2">
             <Card>
-              {/* TABULEIRO */}
+            
               <GameBoard
                 board={game?.board || EMPTY_BOARD}
                 onColumnClick={handleMove}
@@ -485,7 +478,7 @@ export const Game: React.FC = () => {
                 disabled={isBoardBlocked()}
               />
 
-              {/* JOGADORES */}
+              
               <div className="mt-8 grid grid-cols-2 gap-4">
                 <div
                   className={`p-4 rounded-lg transition-all ${game?.currentPlayer === 'player1'
@@ -499,16 +492,16 @@ export const Game: React.FC = () => {
 
                   <div className="flex items-center gap-2">
                     <img
-                      src={room.player1?.avatar}
-                      alt={room.player1?.username}
+                      src={room?.player1?.avatar}
+                      alt={room?.player1?.username}
                       className="w-8 h-8 rounded-full"
                     />
 
                     <span className="font-semibold">
-                      {room.player1?.username}
+                      {room?.player1?.username}
                     </span>
 
-                    {isRoomHost && room.player1?.id === user?.id && (
+                    {isRoomHost && room?.player1?.id === user?.id && (
                       <span className="ml-auto text-xs bg-blue-600 px-2 py-1 rounded">
                         HOST
                       </span>
@@ -527,7 +520,7 @@ export const Game: React.FC = () => {
                   </p>
 
                   <div className="flex items-center gap-2">
-                    {room.player2 ? (
+                    {room?.player2 ? (
                       <>
                         <img
                           src={room.player2?.avatar}
@@ -554,9 +547,8 @@ export const Game: React.FC = () => {
                 </div>
               </div>
 
-              {/* CONTROLES */}
               <div className="mt-6 space-y-4">
-                {/* Botão: Iniciar Jogo (apenas para host se há 2 jogadores e jogo não iniciou) */}
+                
                 {!game && canStartGame && isRoomHost && (
                   <Button
                     variant="primary"
@@ -564,29 +556,28 @@ export const Game: React.FC = () => {
                     onClick={handleStartGame}
                     isLoading={startingGame}
                   >
-                    ▶️ Começar Jogo
+                    Começar Jogo
                   </Button>
                 )}
 
-                {/* Mensagem: Esperando jogadores */}
+      
                 {!game && !canStartGame && (
                   <div className="bg-blue-900 text-blue-100 p-4 rounded-lg text-center">
                     <p className="text-sm">
-                      ⏳ Aguardando mais um jogador...
+                       Aguardando mais um jogador...
                     </p>
                   </div>
                 )}
 
-                {/* Mensagem: Jogo a decorrer e é a tua vez */}
+       
                 {game && game.status === 'playing' && isCurrentPlayerTurn() && (
                   <div className="bg-green-900 text-green-100 p-4 rounded-lg text-center">
                     <p className="text-sm font-semibold">
-                      ✋ É a tua vez! Faz uma jogada.
+                       É a tua vez! Faz uma jogada.
                     </p>
                   </div>
                 )}
 
-                {/* Botão: Jogar Novamente (após jogo terminar) */}
                 {game &&
                   game.status !== 'playing' &&
                   isCurrentPlayer && (
@@ -595,7 +586,7 @@ export const Game: React.FC = () => {
                       className="w-full"
                       onClick={handleResetGame}
                     >
-                      🔄 Jogar Novamente
+                       Jogar Novamente
                     </Button>
                   )}
               </div>
@@ -640,7 +631,7 @@ export const Game: React.FC = () => {
                   </h1>
 
                   <p className="text-white text-lg">
-                    🎉 Vencedor:{" "}
+                     Vencedor:{" "}
                     <span className="font-bold">
                       {game?.winner?.username ||
                         (game?.winnerId === game?.player1Id

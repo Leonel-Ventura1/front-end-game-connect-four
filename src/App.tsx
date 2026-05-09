@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Header } from './components/Header.js';
@@ -13,7 +13,7 @@ import './styles/globals.css';
 
 function App() {
   useEffect(() => {
-    // Set user ID in localStorage for chat messages
+  
     const token = localStorage.getItem('token');
     if (token) {
       try {
